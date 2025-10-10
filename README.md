@@ -11,7 +11,14 @@ routes
 
 http://localhost:3000/api/user
 
-post route- /
+register route- /register
+ (post route)
+login route-/login 
+(post route)
+
+get user info route
+/profile
+
 
 
 http://localhost:3000/api/stories

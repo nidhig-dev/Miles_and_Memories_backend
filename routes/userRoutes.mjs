@@ -4,6 +4,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
+//import middleware
+import userAuth from "../middleware/userAuth.mjs";
+
 //import user schema
 import User from "../models/userSchema.mjs";
 
@@ -135,7 +138,24 @@ router.route("/login")
         }
 })
 //get user info route
-//@route:/api/user/
+//@route:/api/user/profile
 //@desc: get user info by id of a registered user or logged in user
 //@access:protected
+router.route("/profile")
+.get(userAuth,async(req,res)=>{
+    try{
+        //get the user id from req.user and find by id
+        const user=await User.findById(req.user.id).select("-password");
+        if(!user){
+            return res.status(404).json({errors:[{msg:"User not found"}]});
+        }
+        res.json(user);
+    }
+    catch(err){
+        console.error(err.message);
+        res.status(err.status||500).json({errors:[{msg:err.message}]})
+    }
+})
+
+
 export default router;
