@@ -9,7 +9,7 @@ export default function(req,res,next){
     const token=req.header("x-auth-token");
     //throw error if no token
     if (!token){
-        return resizeBy.status(401).json({errors:[{msg:"No Token, permission denied"}]});
+        return res.status(401).json({errors:[{msg:"No Token, permission denied"}]});
     }
     try{
         //verify the token and get the payload

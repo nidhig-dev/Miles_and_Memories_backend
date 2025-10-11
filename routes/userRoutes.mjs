@@ -103,9 +103,7 @@ router.route("/login")
             let user = await User.findOne({ email });
             //if no user is found-throw error
             if (!user) {
-                return res
-                    .status(400)
-                    .json({ errors: [{ msg: "Invalid Credentials" }] });
+                return res.status(400).json({ errors: [{ msg: "Invalid Credentials" }] });
             }
             //if user is found, match the password user entered with the database
             const isMatch = await bcrypt.compare(password, user.password);
@@ -153,7 +151,7 @@ router.route("/profile")
     }
     catch(err){
         console.error(err.message);
-        res.status(err.status||500).json({errors:[{msg:err.message}]})
+        res.status(err.status||500).json({errors:[{msg:"Server Error"}]})
     }
 })
 

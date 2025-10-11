@@ -7,7 +7,7 @@ import connectDB from "./db/conn.mjs";
 
 //import routes
 import userRoutes from "./routes/userRoutes.mjs";
-import storiesRoutes from "./routes/storiesRoutes.mjs";
+import storyRoutes from "./routes/storyRoutes.mjs";
 
 //set up
 const app= express();
@@ -27,10 +27,9 @@ app.use(cors());
 //routes
 //user route -for registration
 app.use("/api/user",userRoutes);
-//user route for users to log in and get user info
-//app.use("/api/authUser",)
-//stories route
-app.use("/api/stories",storiesRoutes);
+
+//story route
+app.use("/api/story",storyRoutes);
 
 
 

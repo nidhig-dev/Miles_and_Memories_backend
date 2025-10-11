@@ -21,4 +21,7 @@ get user info route
 
 
 
-http://localhost:3000/api/stories
+http://localhost:3000/api/story
+
+- should title be unique?
+- user schema and story schema should have lowercase and trim chk?
