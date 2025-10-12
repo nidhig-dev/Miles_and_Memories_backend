@@ -32,7 +32,7 @@ router.route("/")
         const userId  = req.user.id;
         try {
             const { title, desc, visitedLocation, imageUrl, visitedDate } = req.body;
-
+            //check if a story title already exists
             // options:i makes case-insensitive exact match});
             let story = await Story.findOne({ title: { $regex: `^${title.trim()}$`, $options: 'i' } });
             if (story) {
@@ -80,9 +80,9 @@ router.route("/")
         res.status(err.status||500).json({errors:[{msg:"Server Error"}]})
     }
 })
-
-    //update a user's story
-    //@route:/api/story
+router.route("/:id")
+    //update a user's story based on story id
+    //@route:/api/story/:id
     //@desc: update a user's story
     //@access:protected
     .put(userAuth, [
@@ -101,11 +101,34 @@ router.route("/")
         console.log(req.user.id);
         const userId = req.user.id;
         try {
+            const storyId=req.params.id;
             const { title, desc, visitedLocation, imageUrl, visitedDate } = req.body;
+            //find the story by story id and user id
+            let story = await Story.findOne({ _id: storyId,userId:userId });
+            if (!story) {
+                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
+            }
+            //convert visitedDate string to a number and then a Date Object
+            const parsedVisitedDate = new Date(parseInt(visitedDate));
+            
+            //add the story to database
+            story = new Story({
+                title,
+                desc,
+                visitedLocation,
+                userId,
+                imageUrl,
+                visitedDate: parsedVisitedDate,
+            })
+            console.log(story);
+            //save the story
+            await story.save();
+            res.status(201).json(story);
 
     }
 catch(err){
     console.error(err.message);
+    res.status(err.status(err.status||500).json({errors:[{msg:err.message}]}));
 }})
 
 

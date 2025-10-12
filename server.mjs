@@ -20,10 +20,8 @@ dotenv.config();
 //This is to serve static files from backend dir
 // gives the path to server.mjs
 const __filename = fileURLToPath(import.meta.url);
-//gives the path up till dir name where server.mjs is saved.
+//gives the path up till dir name(backend) where server.mjs is saved.
 const __dirname = dirname(__filename);
-console.log("File:", __filename);
-console.log("Dir:", __dirname);
 
 //Connect to database
 connectDB();
@@ -39,11 +37,11 @@ app.use(cors());
 //user route -for registration
 app.use("/api/user",userRoutes);
 
-//story route
-app.use("/api/story",storyRoutes);
-
 //image route
 app.use("/api/image",imageRoutes);
+
+//story route
+app.use("/api/story", storyRoutes);
 
 //route to serve static files
 //get method to get the image from uploads folder

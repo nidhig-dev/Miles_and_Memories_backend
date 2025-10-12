@@ -1,10 +1,13 @@
 import express from "express";
+import path, { dirname } from "path";
+import fs from "fs";
 
 //import middleware
 import upload from "../middleware/imageAuth.mjs";
+import { fileURLToPath } from "url";
 
 //set up
-const router =express.Router();
+const router = express.Router();
 
 //route
 
@@ -30,6 +33,39 @@ router.route("/")
             console.error(err.message);
             res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
         }
+    })
+    .delete(async (req, res) => {
+        try {
+            //get image url
+            const {imageUrl}=req.query;
+            console.log(imageUrl);
+            if(!imageUrl){
+                return res.status(400).json({errors:[{msg:"imageUrl parameter is required"}]})
+            }
+            //get file name from imageUrl- basename returns last portion of the path
+            const fileName = path.basename(imageUrl);
+            // gives the path to imageRoutes.mjs
+            const __filename = fileURLToPath(import.meta.url);
+            //gives the path up till dir name(routes) where imageRoutes.mjs is saved.
+            const __dirname = dirname(__filename);
+            //relative path of uploads from routes folder.
+            const filePath = path.join(__dirname , "../uploads" , fileName);
+            //check if file exists at this file path
+            if(fs.existsSync(filePath)){
+                //delete the file
+                fs.unlinkSync(filePath);
+                res.status(200).json({msg:"Image deleted successfully"})
+            }
+            else{
+                
+                return res.status(404).json({errors:[{msg:"Image not found"}]})
+            }
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status||500).json({errors:[{msg:"Server Errror"}]})
+        }
+
     })
 
 //export
