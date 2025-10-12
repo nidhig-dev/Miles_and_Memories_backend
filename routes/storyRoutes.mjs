@@ -29,7 +29,7 @@ router.route("/")
         }
         //get user Id from the payload
         console.log(req.user.id);
-        const userId  = req.user.id;
+        const userId = req.user.id;
         try {
             const { title, desc, visitedLocation, imageUrl, visitedDate } = req.body;
             //check if a story title already exists
@@ -40,9 +40,9 @@ router.route("/")
             }
             console.log(visitedDate);
             //convert visitedDate string to a number and then a Date Object
-            const parsedVisitedDate = new Date(parseInt(visitedDate));           
+            const parsedVisitedDate = new Date(parseInt(visitedDate));
             console.log(parsedVisitedDate);
-            
+
             //add the story to database
             story = new Story({
                 title,
@@ -63,75 +63,82 @@ router.route("/")
         }
 
     })
-//get all the user stories
-//@route:/api/story
-//@desc: get all the user stories
-//@access:protected
-.get(userAuth,async(req,res)=>{
-    try{
-        //get the user id from req.user and find all stories by id
-        
-        const story=await Story.find({userId:req.user.id});
-        //if a story exists, send it to client.        
-        res.json(story);
-    }
-    catch(err){
-        console.error(err.message);
-        res.status(err.status||500).json({errors:[{msg:"Server Error"}]})
-    }
-})
+    //get all the user stories
+    //@route:/api/story
+    //@desc: get all the user stories
+    //@access:protected
+    .get(userAuth, async (req, res) => {
+        try {
+            //get the user id from req.user and find all stories by id
+
+            const story = await Story.find({ userId: req.user.id });
+            if (story.length > 0) {
+                //if a story exists, send it to client.        
+                res.json(story);
+            }
+            else {
+                res.status(404).json({ errors: [{ msg: "No story found." }] })
+            }
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
+        }
+    })
 router.route("/:id")
     //update a user's story based on story id
     //@route:/api/story/:id
     //@desc: update a user's story
     //@access:protected
-    .put(userAuth, [
-        check("title", "Please include a title").not().isEmpty(),
-        check("desc", "Please include a description").not().isEmpty(),
-        check("visitedLocation", "Please include a location").not().isEmpty(),
-        check("imageUrl", "Please include an Image").not().isEmpty(),
-        check("visitedDate", "Please include a visitedDate").not().isEmpty(),
-
-    ], async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        //get user Id from the payload
-        console.log(req.user.id);
-        const userId = req.user.id;
+    .put(userAuth, async (req, res) => {
         try {
-            const storyId=req.params.id;
-            const { title, desc, visitedLocation, imageUrl, visitedDate } = req.body;
+            //get user Id from the payload
+            const userId = req.user.id;
+            //get story id from params
+            const storyId = req.params.id;
+            //check if visited date is in the req.body
+            if (req.body.visitedDate) {
+                //convert visitedDate string to a number and then a Date Object
+                const parsedVisitedDate = new Date(parseInt(req.body.visitedDate));
+                //update visited data with date object
+                req.body.visitedDate = parsedVisitedDate
+            }
             //find the story by story id and user id
-            let story = await Story.findOne({ _id: storyId,userId:userId });
+            let updatedStory = await Story.findOneAndUpdate({ _id: storyId, userId: userId }, req.body, { new: true, runValidator: true });
+            if (!updatedStory) {
+                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
+            }
+            res.status(201).json(updatedStory);
+
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: err.message }] });
+        }
+    })
+    //delete a user's story based on story id
+    //@route:/api/story/:id
+    //@desc: delete a user's story
+    //@access:protected
+    .delete(userAuth, async (req, res) => {
+        try {
+            //get user Id from the payload
+            const userId = req.user.id;
+            //get story id from params
+            const storyId = req.params.id;
+            
+            //delete the story by story id and user id
+            let story = await Story.findOneAndDelete({ _id: storyId, userId: userId });
             if (!story) {
                 return res.status(404).json({ errors: [{ msg: "Story not found." }] })
             }
-            //convert visitedDate string to a number and then a Date Object
-            const parsedVisitedDate = new Date(parseInt(visitedDate));
-            
-            //add the story to database
-            story = new Story({
-                title,
-                desc,
-                visitedLocation,
-                userId,
-                imageUrl,
-                visitedDate: parsedVisitedDate,
-            })
-            console.log(story);
-            //save the story
-            await story.save();
             res.status(201).json(story);
-
-    }
-catch(err){
-    console.error(err.message);
-    res.status(err.status(err.status||500).json({errors:[{msg:err.message}]}));
-}})
-
-
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: err.message }] });
+        }
+    })
 
 
 export default router;

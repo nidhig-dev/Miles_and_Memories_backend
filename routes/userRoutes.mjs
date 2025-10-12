@@ -36,7 +36,7 @@ router.route("/register")
         let user= await User.findOne({email});
         //throw error if user is found
         if(user){
-            return res.json(400).json({errors:[{msg:"User Exists.Please log in."}]})
+            return res.status(400).json({errors:[{msg:"User Exists.Please log in."}]})
         }
         //save user in User database
         user=new User({
