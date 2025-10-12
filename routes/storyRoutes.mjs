@@ -3,9 +3,9 @@ import { check, validationResult } from "express-validator";
 
 
 //import story schema
-import Story from "../models/storySchema.mjs"
+import Story from "../models/storySchema.mjs";
 //import middleware
-import userAuth from "../middleware/userAuth.mjs"
+import userAuth from "../middleware/userAuth.mjs";
 
 //setup
 const router = express.Router();
@@ -39,8 +39,8 @@ router.route("/")
                 return res.status(400).json({ errors: [{ msg: "Story already exists." }] })
             }
             console.log(visitedDate);
-            //convert visitedDate to Date Object
-            const parsedVisitedDate= new Date(parseInt(visitedDate));
+            //convert visitedDate string to a number and then a Date Object
+            const parsedVisitedDate = new Date(parseInt(visitedDate));           
             console.log(parsedVisitedDate);
             
             //add the story to database
@@ -107,6 +107,7 @@ router.route("/")
 catch(err){
     console.error(err.message);
 }})
+
 
 
 
