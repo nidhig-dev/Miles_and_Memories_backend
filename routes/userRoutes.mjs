@@ -32,13 +32,13 @@ router.route("/register")
     try{
         //get user registration data from req.body
         const{userName,email,password}=req.body;
-                
         let user= await User.findOne({email});
         //throw error if user is found
         if(user){
             return res.status(400).json({errors:[{msg:"User Exists.Please log in."}]})
         }
         //save user in User database
+        
         user=new User({
             userName,
             email,

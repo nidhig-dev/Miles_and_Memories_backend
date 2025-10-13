@@ -34,6 +34,7 @@ router.route("/")
         const userId = req.user.id;
         try {
             const { title, desc, visitedLocation, imageUrl, visitedDate } = req.body;
+            //The imgUrl is coming from post method of imageRoutes
             //check if a story title already exists
             // options:i makes case-insensitive exact match});
             let story = await Story.findOne({ title: { $regex: `^${title.trim()}$`, $options: 'i' } });
