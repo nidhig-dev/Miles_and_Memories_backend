@@ -26,7 +26,7 @@ router.route("/")
             }
             //create image url to store in database
             //This is also for front end to pick image from to display to user
-            const imageUrl = `http://localhost:3000/api/uploads/${req.file.filename}`;
+            const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
             res.status(201).json(imageUrl);
         }
         catch (err) {

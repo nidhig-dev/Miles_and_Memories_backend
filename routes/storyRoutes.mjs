@@ -1,8 +1,8 @@
 import express from "express";
 import { check, validationResult } from "express-validator";
-import {fileURLToPath} from "url";
+import { fileURLToPath } from "url";
 import fs from "fs";
-import path, {dirname} from "path";
+import path, { dirname } from "path";
 
 //import story schema
 import Story from "../models/storySchema.mjs";
@@ -16,6 +16,103 @@ const router = express.Router();
 //@desc: Adds a new story
 //@access:protected
 
+router.route("/:id")
+    //update a user's story based on story id
+    //@route:/api/story/:id
+    //@desc: update a user's story
+    //@access:protected
+    .put(userAuth, async (req, res) => {
+        try {
+            //get user Id from the payload
+            const userId = req.user.id;
+            //get story id from params
+            const storyId = req.params.id;
+            //check if visited date is in the req.body
+            if (req.body.visitedDate) {
+                //convert visitedDate string to a number and then a Date Object
+                const parsedVisitedDate = new Date(parseInt(req.body.visitedDate));
+                //update visited data with date object
+                req.body.visitedDate = parsedVisitedDate
+            }
+            //find the story by story id and user id
+            let updatedStory = await Story.findOneAndUpdate({ _id: storyId, userId: userId }, req.body, { new: true, runValidator: true });
+            if (!updatedStory) {
+                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
+            }
+            res.status(201).json(updatedStory);
+
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: err.message }] });
+        }
+    })
+    //delete a user's story based on story id
+    //@route:/api/story/:id
+    //@desc: delete a user's story
+    //@access:protected
+    .delete(userAuth, async (req, res) => {
+        try {
+            //get user Id from the payload
+            const userId = req.user.id;
+            //get story id from params
+            const storyId = req.params.id;
+
+            //delete the story by story id and user id
+            let story = await Story.findOneAndDelete({ _id: storyId, userId: userId });
+            if (!story) {
+                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
+            }
+
+            //delete the image from the uploads folder as well
+            const imageUrl = story.imageUrl;
+
+            //get file name from imageUrl- basename returns last portion of the path
+            const fileName = path.basename(imageUrl);
+            // gives the path to storyRoutes.mjs
+            const __filename = fileURLToPath(import.meta.url);
+            //gives the path up till dir name(routes) where storyRoutes.mjs is saved.
+            const __dirname = dirname(__filename);
+            //relative path of uploads from routes folder.
+            const filePath = path.join(__dirname, "../uploads", fileName);
+            //check if file exists at this file path
+            if (fs.existsSync(filePath)) {
+                //delete the file
+                fs.unlinkSync(filePath);
+            }
+            else {
+                console.error("Failed to delete image file");
+            }
+            res.status(201).json(story);
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
+        }
+    })
+    //get a story by story id
+    //@route:/api/story/:id
+    //@desc: get a story by story id
+    //@access:protected
+    .get(userAuth, async (req, res) => {
+        try {
+            //get user Id from the payload
+            const userId = req.user.id;
+            //get story id from params
+            const storyId = req.params.id;            
+            //find the story by story id and user id
+            let story = await Story.findOne({ _id: storyId, userId: userId });
+            if (!story) {
+                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
+            }
+            //if a story exists, send it to client.        
+            res.json(story);
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
+        }
+    })
 router.route("/")
     .post(userAuth, [
         check("title", "Please include a title").not().isEmpty(),
@@ -88,80 +185,5 @@ router.route("/")
             res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
         }
     })
-router.route("/:id")
-    //update a user's story based on story id
-    //@route:/api/story/:id
-    //@desc: update a user's story
-    //@access:protected
-    .put(userAuth, async (req, res) => {
-        try {
-            //get user Id from the payload
-            const userId = req.user.id;
-            //get story id from params
-            const storyId = req.params.id;
-            //check if visited date is in the req.body
-            if (req.body.visitedDate) {
-                //convert visitedDate string to a number and then a Date Object
-                const parsedVisitedDate = new Date(parseInt(req.body.visitedDate));
-                //update visited data with date object
-                req.body.visitedDate = parsedVisitedDate
-            }
-            //find the story by story id and user id
-            let updatedStory = await Story.findOneAndUpdate({ _id: storyId, userId: userId }, req.body, { new: true, runValidator: true });
-            if (!updatedStory) {
-                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
-            }
-            res.status(201).json(updatedStory);
-
-        }
-        catch (err) {
-            console.error(err.message);
-            res.status(err.status || 500).json({ errors: [{ msg: err.message }] });
-        }
-    })
-    //delete a user's story based on story id
-    //@route:/api/story/:id
-    //@desc: delete a user's story
-    //@access:protected
-    .delete(userAuth, async (req, res) => {
-        try {
-            //get user Id from the payload
-            const userId = req.user.id;
-            //get story id from params
-            const storyId = req.params.id;
-
-            //delete the story by story id and user id
-            let story = await Story.findOneAndDelete({ _id: storyId, userId: userId });
-            if (!story) {
-                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
-            }
-            
-            //delete the image from the uploads folder as well
-            const imageUrl  = story.imageUrl;
-            
-            //get file name from imageUrl- basename returns last portion of the path
-            const fileName = path.basename(imageUrl);
-            // gives the path to storyRoutes.mjs
-            const __filename = fileURLToPath(import.meta.url);
-            //gives the path up till dir name(routes) where storyRoutes.mjs is saved.
-            const __dirname = dirname(__filename);
-            //relative path of uploads from routes folder.
-            const filePath = path.join(__dirname, "../uploads", fileName);
-            //check if file exists at this file path
-            if (fs.existsSync(filePath)) {
-                //delete the file
-                fs.unlinkSync(filePath);                
-            }
-            else {
-                console.error("Failed to delete image file");
-            }
-            res.status(201).json(story);
-        }
-        catch (err) {
-            console.error(err.message);
-            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
-        }
-    })
-
 
 export default router;

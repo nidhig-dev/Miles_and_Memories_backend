@@ -125,9 +125,12 @@ router.route("/login")
                 process.env.jwtSecret,
                 { expiresIn: "6h" },
                 (err, token) => {
-                    if (err) throw err;
-
-                    res.status(201).json({ token });
+                    if (err) {
+                        console.error("JWT sign failed:", err.message);
+                        return res.status(500).json({ errors: [{ msg: "Token generation failed" }] });
+                    } 
+                    //throw err;
+                    res.status(201).json({token});
                 }
             );
         } catch (err) {
