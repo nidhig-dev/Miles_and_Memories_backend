@@ -34,7 +34,8 @@ router.route("/:id")
             
             //check if visited date is in the req.body
             if (req.body.visitedDate) {
-                const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
+                //const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
+                const isoDate = dayjs(req.body.visitedDate).toISOString(); 
                 console.log(isoDate); // 2019-12-31T00:00:00.000Z
 
                 //convert visitedDate string to a number and then a Date Object
@@ -148,9 +149,11 @@ router.route("/")
                 return res.status(400).json({ errors: [{ msg: "Story already exists." }] })
             }
             console.log(visitedDate);
-            //convert visitedDate string to a number and then a Date Object
-            const parsedVisitedDate = new Date(parseInt(visitedDate));
-            console.log(parsedVisitedDate);
+            //convert visitedDate string to a Date Object
+            const isoDate = dayjs(req.body.visitedDate).toISOString(); 
+
+            //const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
+            console.log(isoDate); // 2019-12-31T00:00:00.000Z
 
             //add the story to database
             story = new Story({
@@ -159,7 +162,7 @@ router.route("/")
                 visitedLocation,
                 userId,
                 imageUrl,
-                visitedDate: parsedVisitedDate,
+                visitedDate: isoDate,
             })
             console.log(story);
             //save the story
