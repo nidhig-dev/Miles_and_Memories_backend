@@ -2,6 +2,9 @@ npm init -y
 npm i express mongoose dotenv cors
 npm i express-validator bcryptjs jsonwebtoken
 npm i multer
+npm install dayjs
+
+
 
 
 command to start -

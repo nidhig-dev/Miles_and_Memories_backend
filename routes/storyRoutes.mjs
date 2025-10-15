@@ -3,6 +3,10 @@ import { check, validationResult } from "express-validator";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import path, { dirname } from "path";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+
+dayjs.extend(customParseFormat);
 
 //import story schema
 import Story from "../models/storySchema.mjs";
@@ -27,12 +31,17 @@ router.route("/:id")
             const userId = req.user.id;
             //get story id from params
             const storyId = req.params.id;
+            
             //check if visited date is in the req.body
             if (req.body.visitedDate) {
+                const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
+                console.log(isoDate); // 2019-12-31T00:00:00.000Z
+
                 //convert visitedDate string to a number and then a Date Object
-                const parsedVisitedDate = new Date(parseInt(req.body.visitedDate));
+                //console.log(req.body.visitedDate);
+                //const parsedVisitedDate = new Date(req.body.visitedDate);
                 //update visited data with date object
-                req.body.visitedDate = parsedVisitedDate
+                req.body.visitedDate = isoDate;
             }
             //find the story by story id and user id
             let updatedStory = await Story.findOneAndUpdate({ _id: storyId, userId: userId }, req.body, { new: true, runValidator: true });
