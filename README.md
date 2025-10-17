@@ -5,7 +5,8 @@ npm i multer
 npm install dayjs
 
 
-
+command to run seed data
+node utilities/seedScript.mjs
 
 command to start -
 npm run dev
