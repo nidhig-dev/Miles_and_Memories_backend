@@ -135,7 +135,7 @@ router.route("/login")
             );
         } catch (err) {
             console.error(err.message);
-            res.status(500).json({ errors: [{ msg: "Server Error" }] });
+            res.status(err.status||500).json({ errors: [{ msg: "Server Error" }] });
         }
 })
 //get user info route

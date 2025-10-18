@@ -34,14 +34,9 @@ router.route("/:id")
             
             //check if visited date is in the req.body
             if (req.body.visitedDate) {
-                //const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
+                //// 2019-12-31T00:00:00.000Z format
                 const isoDate = dayjs(req.body.visitedDate).toISOString(); 
-                console.log(isoDate); // 2019-12-31T00:00:00.000Z
-
-                //convert visitedDate string to a number and then a Date Object
-                //console.log(req.body.visitedDate);
-                //const parsedVisitedDate = new Date(req.body.visitedDate);
-                //update visited data with date object
+                console.log(isoDate); 
                 req.body.visitedDate = isoDate;
             }
             //find the story by story id and user id

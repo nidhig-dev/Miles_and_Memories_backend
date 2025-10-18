@@ -31,7 +31,6 @@ async function seedDatabase() {
 
         for (let story of storiesData) {
             for (let eachUser of allUser) {
-                console.log(story.userId,eachUser.userName);
                 //match userid of story data to username of user database
                 if (story.userId == eachUser.userName) {
                     //replace the name of user with object id of user
