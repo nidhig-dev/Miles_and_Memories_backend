@@ -31,12 +31,12 @@ router.route("/:id")
             const userId = req.user.id;
             //get story id from params
             const storyId = req.params.id;
-            
+
             //check if visited date is in the req.body
             if (req.body.visitedDate) {
                 //// 2019-12-31T00:00:00.000Z format
-                const isoDate = dayjs(req.body.visitedDate).toISOString(); 
-                console.log(isoDate); 
+                const isoDate = dayjs(req.body.visitedDate).toISOString();
+                console.log(isoDate);
                 req.body.visitedDate = isoDate;
             }
             //find the story by story id and user id
@@ -104,7 +104,7 @@ router.route("/:id")
             //get user Id from the payload
             const userId = req.user.id;
             //get story id from params
-            const storyId = req.params.id;            
+            const storyId = req.params.id;
             //find the story by story id and user id
             let story = await Story.findOne({ _id: storyId, userId: userId });
             if (!story) {
@@ -118,7 +118,57 @@ router.route("/:id")
             res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
         }
     })
+    
+//search a keyword in title,descripttion and visited location
+//@route:/api/story/keyword/search
+//@desc: search a keyword in title,descripttion and visited location
+//@access:protected
+
+router.route("/keyword/search")
+    .get(userAuth, async (req, res) => {
+        try {
+            //get user Id from the payload
+            const userId = req.user.id;
+            console.log(userId);
+            const { keyword } = req.query;
+            console.log(keyword);
+            if (!keyword || keyword.trim() === "") {
+                return res.status(400).json({ errors: [{ msg: "Please provide a search keyword." }] });
+            }
+            // Create a case-insensitive regex for partial matches
+            const regex = new RegExp(keyword.trim(), "i");
+
+            // Search across multiple fields, including arrays
+            const story = await Story.find({
+                userId: userId,
+                $or: [
+                    { title: regex },
+                    { desc: regex },
+                    //since visited location is an array
+                    { visitedLocation: { $elemMatch: { $regex: regex } } },
+                ],
+            });
+            
+            if (story.length===0) {
+                return res.status(404).json({ errors: [{ msg: "Story not found." }] })
+            }
+            //if a story exists, send it to client.        
+            res.json(story);
+
+        }
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
+        }
+    })
+
+
 router.route("/")
+    //create a new user story
+    //@route:/api/story
+    //@desc: create a new user story
+    //@access:protected
+
     .post(userAuth, [
         check("title", "Please include a title").not().isEmpty(),
         check("desc", "Please include a description").not().isEmpty(),
@@ -139,13 +189,16 @@ router.route("/")
             //The imgUrl is coming from post method of imageRoutes
             //check if a story title already exists
             // options:i makes case-insensitive exact match});
-            let story = await Story.findOne({ title: { $regex: `^${title.trim()}$`, $options: 'i' } });
+            let story = await Story.findOne({ 
+                userId: userId, 
+                title: { $regex: `^${title.trim()}$`, $options: 'i' } 
+            });
             if (story) {
                 return res.status(400).json({ errors: [{ msg: "Story already exists." }] })
             }
             console.log(visitedDate);
             //convert visitedDate string to a Date Object
-            const isoDate = dayjs(req.body.visitedDate).toISOString(); 
+            const isoDate = dayjs(req.body.visitedDate).toISOString();
 
             //const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
             console.log(isoDate); // 2019-12-31T00:00:00.000Z
