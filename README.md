@@ -114,7 +114,7 @@ npm run dev
 | GET    | `/api/story/:id`       | Get a specific story by story Id    |                              
 | PUT    | `/api/story/:id`       | Update a story by story Id          |                              
 | DELETE | `/api/story/:id`       | Delete a story by story Id          |                              
-
+|GET     | `/api/story/keyword/search`| Search a story by keyword       |
 
 🖼️ Image Routes
 
@@ -146,9 +146,9 @@ Saves uploaded images to the defined path
 
 - Backend/Server:
     - ✅Connect to your DB
-    - Effective Error Handling
+    - ✅ Effective Error Handling
     - ✅C.R.U.D capabilities
-    - Documentation:
+    - ✅ Documentation:
     - ✅Well documented readme
     - ✅Full Commit history, 25 commits- ish
         - Extra Credit:
