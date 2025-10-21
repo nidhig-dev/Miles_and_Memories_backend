@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 //set up
 dotenv.config();
-//function
+//This middleware is called before every protected route, it gets the token from header and after decoding it, sets it in payload
 export default function(req,res,next){
     //get token from header
     const token=req.header("x-auth-token");

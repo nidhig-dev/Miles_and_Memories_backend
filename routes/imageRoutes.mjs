@@ -11,21 +11,21 @@ const router = express.Router();
 
 //route
 
-//Upload/Add a image to story
-//@route:/api/image
-//@desc: Upload/Add a image to story
-//@access:protected
 
 router.route("/")
-    //image_story is the name of the form field in jsx.
+    //Add a image to uploads folder
+    //@route:/api/image
+    //@desc: Add a image to uploads folder
+    //@access:can 
+
+    //image_story is the name of the field through which I passed the image in formdata.
     .post(upload.single("image_story"), async (req, res) => {
         try {
             //check for req.file
             if (!req.file) {
                 return res.status(404).json({ errors: [{ msg: "Please upload image" }] })
             }
-            //create image url to store in database
-            //This is also for front end to pick image from to display to user
+            //create image url to store in database            
             const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
             res.status(201).json(imageUrl);
         }
@@ -34,11 +34,14 @@ router.route("/")
             res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
         }
     })
+    //Delete a image from uploads folder when story is being deleted
+    //@route:/api/image
+    //@desc: Delete a image from uploads folder when story is being deleted
+    //@access:protected
+
     .delete(async (req, res) => {
         try {
-            //get image url
             const {imageUrl}=req.query;
-            console.log(imageUrl);
             if(!imageUrl){
                 return res.status(400).json({errors:[{msg:"imageUrl parameter is required"}]})
             }
@@ -65,9 +68,7 @@ router.route("/")
             console.error(err.message);
             res.status(err.status||500).json({errors:[{msg:"Server Errror"}]})
         }
-
     })
-
 //export
 export default router
 

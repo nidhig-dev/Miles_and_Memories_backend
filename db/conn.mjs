@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 //set up-get connection string
 dotenv.config();
 const connectionString= process.env.mongoURI||"";
-
+//connect to db
 async function connectDB(){
     try{
         await mongoose.connect(connectionString);
@@ -13,7 +13,6 @@ async function connectDB(){
     catch(err){
         console.error(err.msessage);
         process.exit(1);
-    }
-    
+    }    
 }
 export default connectDB;

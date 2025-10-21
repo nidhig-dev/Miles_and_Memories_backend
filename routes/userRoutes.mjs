@@ -1,5 +1,5 @@
 import express from "express";
-import {check,validationResult} from "express-validator";
+import { check, validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -11,87 +11,81 @@ import userAuth from "../middleware/userAuth.mjs";
 import User from "../models/userSchema.mjs";
 
 //setup
-const router=express.Router();
+const router = express.Router();
 dotenv.config();
 
 router.route("/register")
-//signup/register user route
+    //signup/register user route
     //@route:/api/user/register
     //@desc: Registers a new user
     //@access:public
-.post([
-    check("userName", "Please include a valid user name").isLength({min:4}),
-    check("email", "Please include a valid email").isEmail(),
-    check("password", "Password must be atleast 6 characters long").isLength({ min: 6 }),
-],async(req,res)=>{
-    const errors=validationResult(req);
-    //check if there are any errors
-    if(!errors.isEmpty()){
-        return res.status(400).json({ errors: errors.array() });
-    }
-    try{
-        //get user registration data from req.body
-        const{userName,email,password}=req.body;
-        let user= await User.findOne({email});
-        //throw error if user is found
-        if(user){
-            return res.status(400).json({errors:[{msg:"User Exists.Please log in."}]})
+    .post([
+        check("userName", "Please include a valid user name").isLength({ min: 4 }),
+        check("email", "Please include a valid email").isEmail(),
+        check("password", "Password must be atleast 6 characters long").isLength({ min: 6 }),
+    ], async (req, res) => {
+        const errors = validationResult(req);
+        //check if there are any errors
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
         }
-        //save user in User database
-        
-        user=new User({
-            userName,
-            email,
-            password,
-        });
-
-        //generate salt of 10 rounds using bcrypt
-        const salt = await bcrypt.genSalt(10);
-        //hash the password
-        user.password=await bcrypt.hash(user.password,salt);
-
-        //save the user 
-        await user.save();
-
-        //create a payload with user id
-        const payload ={
-            user:{
-                id:user._id,
-            },
-        };
-        //create a token with _id, secret and options
-        jwt.sign(
-            payload,
-            process.env.jwtSecret,
-            {expiresIn: "72h"},
-            (err,token)=>{
-                if (err){
-                    throw err;
-                }
-                //send token to http.This will be available in req.headers
-                res.status(201).json({token});
+        try {
+            //get user registration data from req.body
+            const { userName, email, password } = req.body;
+            let user = await User.findOne({ email });
+            //throw error if user is found
+            if (user) {
+                return res.status(400).json({ errors: [{ msg: "User Exists.Please log in." }] })
             }
+            //save user in User database
+            user = new User({
+                userName,
+                email,
+                password,
+            });
 
-        );
+            //generate salt of 10 rounds using bcrypt
+            const salt = await bcrypt.genSalt(10);
+            //hash the password
+            user.password = await bcrypt.hash(user.password, salt);
+            //save the user 
+            await user.save();
+            //create a payload with user id
+            const payload = {
+                user: {
+                    id: user._id,
+                },
+            };
+            //create a token with _id, secret and options
+            jwt.sign(
+                payload,
+                process.env.jwtSecret,
+                { expiresIn: "72h" },
+                (err, token) => {
+                    if (err) {
+                        throw err;
+                    }
+                    //send token to http.This will be available in req.headers
+                    res.status(201).json({ token });
+                }
+            );
+        }
+        catch (err) {
+            console.log(err.message);
+            res.status(err.status || 500).json({ errors: { msg: "Server Error" } })
+        }
+    })
 
-    }
-    catch(err){
-        console.log(err.message);
-        res.status(err.status||500).json({errors:{msg:"Server Error"}})
-    }
-
-})
-//login route
 //Login user route
 //@route:/api/user/login
-//@desc: get user info by id of a registered user or logged in user
+//@desc: Match the email and password of a existing user with entered data
 //@access:public
 
 router.route("/login")
     .post([check("email", "Please include an email").not().isEmpty(),
-        check("password", "Please include a password").not().isEmpty(),
-    ], async (req,res)=>{
-        const errors=validationResult(req);
+    check("password", "Please include a password").not().isEmpty(),
+    ], async (req, res) => {
+        const errors = validationResult(req);
         //check if there are errors
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -128,35 +122,35 @@ router.route("/login")
                     if (err) {
                         console.error("JWT sign failed:", err.message);
                         return res.status(500).json({ errors: [{ msg: "Token generation failed" }] });
-                    } 
+                    }
                     //throw err;
-                    res.status(201).json({token});
+                    res.status(201).json({ token });
                 }
             );
         } catch (err) {
             console.error(err.message);
-            res.status(err.status||500).json({ errors: [{ msg: "Server Error" }] });
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] });
         }
-})
+    })
 //get user info route
 //@route:/api/user/profile
 //@desc: get user info by id of a registered user or logged in user
 //@access:protected
 router.route("/profile")
-.get(userAuth,async(req,res)=>{
-    try{
-        //get the user id from req.user and find by id
-        const user=await User.findById(req.user.id).select("-password");
-        if(!user){
-            return res.status(404).json({errors:[{msg:"User not found"}]});
+    .get(userAuth, async (req, res) => {
+        try {
+            //get the user id from req.user and find by id
+            const user = await User.findById(req.user.id).select("-password");
+            if (!user) {
+                return res.status(404).json({ errors: [{ msg: "User not found" }] });
+            }
+            res.json(user);
         }
-        res.json(user);
-    }
-    catch(err){
-        console.error(err.message);
-        res.status(err.status||500).json({errors:[{msg:"Server Error"}]})
-    }
-})
+        catch (err) {
+            console.error(err.message);
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Error" }] })
+        }
+    })
 
 
 export default router;

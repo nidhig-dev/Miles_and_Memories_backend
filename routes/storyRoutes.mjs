@@ -15,10 +15,6 @@ import userAuth from "../middleware/userAuth.mjs";
 
 //setup
 const router = express.Router();
-//Create a new story for a user
-//@route:/api/story
-//@desc: Adds a new story
-//@access:protected
 
 router.route("/:id")
     //update a user's story based on story id
@@ -34,9 +30,8 @@ router.route("/:id")
 
             //check if visited date is in the req.body
             if (req.body.visitedDate) {
-                //// 2019-12-31T00:00:00.000Z format
+                //convert to 2019-12-31T00:00:00.000Z format
                 const isoDate = dayjs(req.body.visitedDate).toISOString();
-                console.log(isoDate);
                 req.body.visitedDate = isoDate;
             }
             //find the story by story id and user id
@@ -45,7 +40,6 @@ router.route("/:id")
                 return res.status(404).json({ errors: [{ msg: "Story not found." }] })
             }
             res.status(201).json(updatedStory);
-
         }
         catch (err) {
             console.error(err.message);
@@ -119,9 +113,9 @@ router.route("/:id")
         }
     })
     
-//search a keyword in title,descripttion and visited location
+//search a keyword in title,description and visited location
 //@route:/api/story/keyword/search
-//@desc: search a keyword in title,descripttion and visited location
+//@desc: search a keyword in title,description and visited location
 //@access:protected
 
 router.route("/keyword/search")
@@ -129,16 +123,14 @@ router.route("/keyword/search")
         try {
             //get user Id from the payload
             const userId = req.user.id;
-            console.log(userId);
             const { keyword } = req.query;
-            console.log(keyword);
             if (!keyword || keyword.trim() === "") {
                 return res.status(400).json({ errors: [{ msg: "Please provide a search keyword." }] });
             }
             // Create a case-insensitive regex for partial matches
             const regex = new RegExp(keyword.trim(), "i");
 
-            // Search across multiple fields, including arrays
+            // Search across multiple fields, including array
             const story = await Story.find({
                 userId: userId,
                 $or: [
@@ -154,7 +146,6 @@ router.route("/keyword/search")
             }
             //if a story exists, send it to client.        
             res.json(story);
-
         }
         catch (err) {
             console.error(err.message);
@@ -182,7 +173,6 @@ router.route("/")
             return res.status(400).json({ errors: errors.array() });
         }
         //get user Id from the payload
-        console.log(req.user.id);
         const userId = req.user.id;
         try {
             const { title, desc, visitedLocation, imageUrl, visitedDate } = req.body;
@@ -196,13 +186,9 @@ router.route("/")
             if (story) {
                 return res.status(400).json({ errors: [{ msg: "Story already exists." }] })
             }
-            console.log(visitedDate);
             //convert visitedDate string to a Date Object
             const isoDate = dayjs(req.body.visitedDate).toISOString();
-
-            //const isoDate = dayjs(req.body.visitedDate, "Do MMMM YYYY").toISOString();
-            console.log(isoDate); // 2019-12-31T00:00:00.000Z
-
+            
             //add the story to database
             story = new Story({
                 title,
@@ -212,7 +198,6 @@ router.route("/")
                 imageUrl,
                 visitedDate: isoDate,
             })
-            console.log(story);
             //save the story
             await story.save();
             res.status(201).json(story);
@@ -230,7 +215,6 @@ router.route("/")
     .get(userAuth, async (req, res) => {
         try {
             //get the user id from req.user and find all stories by id
-
             const story = await Story.find({ userId: req.user.id });
             if (story.length > 0) {
                 //if a story exists, send it to client.        

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-//set up
 
+//story schema
 const storySchema=new mongoose.Schema({
     title:{
         type:String,
