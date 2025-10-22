@@ -117,7 +117,7 @@ router.route("/login")
             jwt.sign(
                 payload,
                 process.env.jwtSecret,
-                { expiresIn: "6h" },
+                { expiresIn: "72h" },
                 (err, token) => {
                     if (err) {
                         console.error("JWT sign failed:", err.message);

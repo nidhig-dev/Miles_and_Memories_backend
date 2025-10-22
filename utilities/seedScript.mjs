@@ -35,12 +35,10 @@ async function seedDatabase() {
                 if (story.userId == eachUser.userName) {
                     //replace the name of user with object id of user
                     story.userId = eachUser._id;
-                    // console.log("user id is",story.userId);
                     break;
                 }
             }
         }
-// console.log("all user is",storiesData);
         console.log(`✅ Mapped new stories with new userID`)
 
         await Story.deleteMany();

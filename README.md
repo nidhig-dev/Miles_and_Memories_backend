@@ -128,19 +128,19 @@ npm run dev
 
 🔒 userAuth.mjs
 
-Extracts and verifies JWT tokens from headers
+    - Extracts and verifies JWT tokens from headers
 
-Confirms user validity in the database
+    - Confirms user validity in the database
 
-Protects routes like api/user/profile and api/story
+    - Protects routes like api/user/profile and api/story
 
 🖼️ imageAuth.mjs
 
-Handles file uploads with Multer
+    - Handles file uploads with Multer
 
-Validates image types
+    - Validates image types
 
-Saves uploaded images to the defined path
+    - Saves uploaded images to the defined path
 
 ### Requirement
 

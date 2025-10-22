@@ -20,7 +20,7 @@ export default function(req,res,next){
     }
     catch(err){
         console.error(err.message);
-        res.json(401).json({errors:[{msg:"Authentication failed"}]})
+        res.status(401).json({errors:[{msg:"Authentication failed"}]})
     }
 }
 
