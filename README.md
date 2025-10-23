@@ -67,8 +67,6 @@ userData.mjs
 
 🌿 Seed script
 
-utilities/seedScript.mjs handles database seeding.
-
 ▶️ Run the seed script
 
 ```bash
@@ -141,6 +139,10 @@ npm run dev
     - Validates image types
 
     - Saves uploaded images to the defined path
+
+### 🙌 Acknowledgements
+
+- 📸 **multer** for image uploads
 
 ### Requirement
 
