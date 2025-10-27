@@ -26,7 +26,7 @@ router.route("/")
                 return res.status(404).json({ errors: [{ msg: "Please upload image" }] })
             }
             //create image url to store in database            
-            const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+            const imageUrl = `https://miles-and-memories-backend.onrender.com/uploads/${req.file.filename}`;
             res.status(201).json(imageUrl);
         }
         catch (err) {
@@ -41,9 +41,9 @@ router.route("/")
 
     .delete(async (req, res) => {
         try {
-            const {imageUrl}=req.query;
-            if(!imageUrl){
-                return res.status(400).json({errors:[{msg:"imageUrl parameter is required"}]})
+            const { imageUrl } = req.query;
+            if (!imageUrl) {
+                return res.status(400).json({ errors: [{ msg: "imageUrl parameter is required" }] })
             }
             //get file name from imageUrl- basename returns last portion of the path
             const fileName = path.basename(imageUrl);
@@ -52,21 +52,21 @@ router.route("/")
             //gives the path up till dir name(routes) where imageRoutes.mjs is saved.
             const __dirname = dirname(__filename);
             //relative path of uploads from routes folder.
-            const filePath = path.join(__dirname , "../uploads" , fileName);
+            const filePath = path.join(__dirname, "../uploads", fileName);
             //check if file exists at this file path
-            if(fs.existsSync(filePath)){
+            if (fs.existsSync(filePath)) {
                 //delete the file
                 fs.unlinkSync(filePath);
-                res.status(200).json({msg:"Image deleted successfully"})
+                res.status(200).json({ msg: "Image deleted successfully" })
             }
-            else{
-                
-                return res.status(404).json({errors:[{msg:"Image not found"}]})
+            else {
+
+                return res.status(404).json({ errors: [{ msg: "Image not found" }] })
             }
         }
         catch (err) {
             console.error(err.message);
-            res.status(err.status||500).json({errors:[{msg:"Server Errror"}]})
+            res.status(err.status || 500).json({ errors: [{ msg: "Server Errror" }] })
         }
     })
 //export
